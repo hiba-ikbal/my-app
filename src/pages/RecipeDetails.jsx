@@ -41,7 +41,6 @@ export default function RecipeDetails({ recipes, onDelete }) {
       <h3>Instructions</h3>
       <p>{instructions}</p>
 
-      {/* External link */}
 
       {/* External link */}
       {recipe.link && (
