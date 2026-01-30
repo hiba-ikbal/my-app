@@ -6,7 +6,7 @@ export default function BottomNav() {
   const isActive = (path) => location.pathname === path
 
   return (
-    <nav className="bottom-nav">
+    <nav className="bottom-nav" style={{display:"flex", flexDirection:"row", justifyContent:"space-around"}}>
       
       <Link to="/" className={isActive('/') ? 'text-black' : 'text-gray-400'}>
         <Home />

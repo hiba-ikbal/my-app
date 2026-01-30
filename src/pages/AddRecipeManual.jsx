@@ -1,38 +1,38 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
-export default function AddRecipeManual({ setRecipes }) {
-  const navigate = useNavigate();
+// export default function AddRecipeManual({ setRecipes, recipe, onSave, onCancel }) {
+export default function AddRecipeManual({recipe, onSave, onCancel }) {
 
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [image, setImage] = useState("");
-  const [ingredients, setIngredients] = useState("");
-  const [instructions, setInstructions] = useState("");
+  // const navigate = useNavigate();
+
+  const [title, setTitle] = useState(recipe?.title || "");
+  const [category, setCategory] = useState(recipe?.category || "");
+  const [image, setImage] = useState(recipe?.image || "");
+  const [ingredients, setIngredients] = useState(recipe?.ingredients || "");
+  const [instructions, setInstructions] = useState(recipe?.instructions || "");
 
   function handleSubmit(e) {
     e.preventDefault();
 
     if (!title.trim()) return;
 
-    const newRecipe = {
-      id: `${Date.now()}-${Math.random()}`,
-      title,
-      category,
-      image,
-      ingredients,
-      instructions,
-    };
+  const savedRecipe={
+    id: recipe?.id ?? `${Date.now()}-${Math.random()}`,
+    title,
+    category,
+    image,
+    ingredients,
+    instructions,
+  };
+  onSave(savedRecipe);
+}
 
-    setRecipes(prev => [...prev, newRecipe]);
-    navigate("/");
-    console.log(newRecipe);
 
-  }
 
   return (
     <div>
-      <h1>Add Recipe Manually</h1>
+      <h1>{recipe ? "Edit Recipe" : "Add Recipe"}</h1>
 
       <form onSubmit={handleSubmit}>
         {/* Title */}
@@ -84,6 +84,9 @@ export default function AddRecipeManual({ setRecipes }) {
         />
 
         <button type="submit">Save recipe</button>
+        <button type="button" onClick={onCancel}>Cancel</button>
+
+
         
       </form>
 

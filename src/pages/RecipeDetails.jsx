@@ -1,48 +1,60 @@
 import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import AddRecipeManual from "./AddRecipeManual";
 
-export default function RecipeDetails({ recipes, onDelete }) {
+export default function RecipeDetails({ recipes, onDelete, onUpdate }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  
-  const recipe = recipes.find(r => r.id === id);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // if recipe not found
- if (!recipe) {
+  const recipe = recipes.find(r => String(r.id) === id);
+
+  if (!recipe) {
+    return (
+      <div>
+        <p>Recipe not found.</p>
+        <button onClick={() => navigate("/")}>Back</button>
+      </div>
+    );
+  }
+
+  if (isEditing) {
+    return (
+      <AddRecipeManual
+        recipe={recipe}
+        onSave={(updated) => {
+          onUpdate(updated);
+          setIsEditing(false);
+        }}
+        onCancel={() => setIsEditing(false)}
+      />
+    );
+  }
+
   return (
     <div>
-      <p>Recipe not found.</p>
-      <button
-          onClick={() => {
-            onDelete(Number(id));
-            navigate("/");
-          }}
-        >
-          Delete recipe
-        </button>
-    </div>
-  );
-}
-  
-  
-  // prevent `.split` crash
-  const ingredients = recipe.ingredients || "";
-  const instructions = recipe.instructions || "";
-  return (
-   <div>
       <h1>{recipe.title}</h1>
-      {recipe.image && <img src={recipe.image} alt=""  style={{ maxWidth: "30%", borderRadius: 12 }}/>}
+
+      {recipe.image && (
+        <img
+          src={recipe.image}
+          alt=""
+          style={{ maxWidth: "30%", borderRadius: 12 }}
+        />
+      )}
+
       <p><strong>Category:</strong> {recipe.category}</p>
+
       <h3>Ingredients</h3>
       <ul>
-        {ingredients.split("\n").map((i, idx) => (
+        {(recipe.ingredients || "").split("\n").map((i, idx) => (
           <li key={idx}>{i}</li>
         ))}
       </ul>
+
       <h3>Instructions</h3>
-      <p>{instructions}</p>
+      <p>{recipe.instructions}</p>
 
-
-      {/* External link */}
       {recipe.link && (
         <p>
           <a href={recipe.link} target="_blank" rel="noreferrer">
@@ -51,16 +63,15 @@ export default function RecipeDetails({ recipes, onDelete }) {
         </p>
       )}
 
-    <button
+      <button onClick={() => setIsEditing(true)}>Edit</button>
+      <button
         onClick={() => {
           onDelete(recipe.id);
           navigate("/");
         }}
       >
-        Delete recipe
+        Delete
       </button>
-    
- </div>
-
+    </div>
   );
 }

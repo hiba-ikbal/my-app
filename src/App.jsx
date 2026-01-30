@@ -1,50 +1,79 @@
-import { Routes, Route } from 'react-router-dom'
-import { useEffect,useState } from 'react'
-import Home from './pages/Home'
-import Recipes from './pages/Recipes'
-import Grocery from './pages/Grocery'
-import Favorites from './pages/Favorites'
-import Profile from './pages/Profile'
-import AddRecipeManual from './pages/AddRecipeManual'
-import AddRecipeLink from './pages/AddRecipeLink'
-import BottomNav from './components/BottomNav'
-import RecipeDetails from './pages/RecipeDetails'
-import ErrorBoundary from './components/ErrorBoundary'
+import { Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
+
+import Home from "./pages/Home";
+import Recipes from "./pages/Recipes";
+import Grocery from "./pages/Grocery";
+import Favorites from "./pages/Favorites";
+import Profile from "./pages/Profile";
+import RecipeDetails from "./pages/RecipeDetails";
+
+import BottomNav from "./components/BottomNav";
+import ErrorBoundary from "./components/ErrorBoundary";
+
 export default function App() {
-  //load recipes from localstorage (also helpful when deleting)
   const [recipes, setRecipes] = useState(() => {
-  const saved = localStorage.getItem("recipes");
-  return saved ? JSON.parse(saved) : [];
-});
+    const saved = localStorage.getItem("recipes");
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  //to save when recipe change or delete
   useEffect(() => {
-  localStorage.setItem("recipes", JSON.stringify(recipes));
-}, [recipes]);
-function deleteRecipe(id) {
-  setRecipes(prev => prev.filter(r => r.id !== id));
-}
+    localStorage.setItem("recipes", JSON.stringify(recipes));
+  }, [recipes]);
+
+  function deleteRecipe(id) {
+    setRecipes(prev => prev.filter(r => r.id !== id));
+  }
+
+  function updateRecipe(updatedRecipe) {
+    setRecipes(prev =>
+      prev.map(r => (r.id === updatedRecipe.id ? updatedRecipe : r))
+    );
+  }
+
   return (
-    
+    <ErrorBoundary>
+      <>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                recipes={recipes}
+                setRecipes={setRecipes}
+                onDelete={deleteRecipe}
+              />
+            }
+          />
 
-<ErrorBoundary>
-  {/* any error within RecipeDetails or its children will be caught here */}
-<>
-      <Routes>
-        <Route path="/" element={<Home recipes={recipes} onDelete={deleteRecipe}/>} />
-        <Route path="/recipes" element={<Recipes recipes={recipes} onDelete={deleteRecipe}/>} />
-        <Route path="/recipes/:id"element={<RecipeDetails recipes={recipes} onDelete={deleteRecipe}/>}/>
-        <Route path="/grocery" element={<Grocery />} />
-        <Route path="/favorites" element={<Favorites />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/add/manual" element={<AddRecipeManual setRecipes={setRecipes} />} />
-        <Route path="/add/link" element={<AddRecipeLink setRecipes={setRecipes}/>} />
-      
-      </Routes>
+          <Route
+            path="/recipes"
+            element={
+              <Recipes
+                recipes={recipes}
+                onDelete={deleteRecipe}
+              />
+            }
+          />
 
-      <BottomNav />
-      
-    </>
-  </ErrorBoundary>
-  )
+          <Route
+            path="/recipes/:id"
+            element={
+              <RecipeDetails
+                recipes={recipes}
+                onDelete={deleteRecipe}
+                onUpdate={updateRecipe}
+              />
+            }
+          />
+
+          <Route path="/grocery" element={<Grocery />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
+
+        <BottomNav />
+      </>
+    </ErrorBoundary>
+  );
 }

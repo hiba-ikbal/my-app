@@ -1,32 +1,51 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import AddRecipeManual from "../pages/AddRecipeManual";
-export default function AddRecipeModal({ onClose }) {
-  const navigate = useNavigate();
+import AddRecipeLink from "../pages/AddRecipeLink";
+
+
+export default function AddRecipeModal({ onClose, onAdd }) {
+  const [mode, setMode] = useState("choose"); // choose | manual | link
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
         className="modal-content"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2>Add a recipe</h2>
+        {mode === "choose" && (
+          <>
+            <h2>Add a recipe</h2>
 
-        <div className="modal-actions">
-          <button
-            onClick={() => {
+            <div className="modal-actions">
+              <button onClick={() => setMode("manual")}>
+                Add manually
+              </button>
+              <button onClick={() => setMode("link")}>
+                Paste recipe link
+              </button>
+            </div>
+          </>
+        )}
+
+        {mode === "manual" && (
+          <AddRecipeManual
+            onSave={(recipe) => {
+              onAdd(recipe);
               onClose();
-              navigate("/add/manual");
             }}
-          >
-            Add manually
-          </button>
+            onCancel={onClose}
+          />
+        )}
 
-          <button onClick={()=>{
-            onClose();
-            navigate("/add/link");
-          }}>
-            Paste recipe link
-          </button>
-        </div>
+        {mode === "link" && (
+          <AddRecipeLink
+            onSave={(recipe) => {
+              onAdd(recipe);
+              onClose();
+            }}
+            onCancel={onClose}
+          />
+        )}
 
         <button className="close-btn" onClick={onClose}>
           Close

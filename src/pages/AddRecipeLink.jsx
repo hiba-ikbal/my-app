@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-export default function AddRecipeLink({ setRecipes }) {
+export default function AddRecipeLink({ onSave, onCancel }) {
   const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
+  const [link, setLink] = useState("");
   const [image, setImage] = useState("");
-  const navigate = useNavigate();
-//learn more abt the api
-  async function fetchPreviewImage(link) {
+  const [loading, setLoading] = useState(false);
+
+  async function fetchPreviewImage(url) {
     try {
       const res = await fetch(
-        `https://api.microlink.io?url=${encodeURIComponent(link)}`
+        `https://api.microlink.io?url=${encodeURIComponent(url)}`
       );
       const data = await res.json();
       return data?.data?.image?.url || "";
@@ -21,26 +20,30 @@ export default function AddRecipeLink({ setRecipes }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!url || !title) return;
+    if (!title.trim() || !link.trim()) return;
 
-    const previewImage = await fetchPreviewImage(url);
+    setLoading(true);
+
+    const previewImage = await fetchPreviewImage(link);
 
     const newRecipe = {
-      id:`${Date.now()}-${Math.random()}`,
+      id: `${Date.now()}-${Math.random()}`,
       title,
       category: "External",
-      image: previewImage,
-      sourceUrl: url,
+      link,                 
+      image: previewImage,  
+      ingredients: "",
+      instructions: "",
       isExternal: true,
     };
 
-    setRecipes(prev => [...prev, newRecipe]);
-    navigate("/");
+    onSave(newRecipe);
+    setLoading(false);
   }
 
   return (
     <div>
-      <h1>Add Recipe from Link</h1>
+      <h2>Add Recipe from Link</h2>
 
       <form onSubmit={handleSubmit}>
         <input
@@ -51,15 +54,28 @@ export default function AddRecipeLink({ setRecipes }) {
         />
 
         <input
+          type="url"
           placeholder="Paste recipe link"
-          value={url}
-          onChange={e => setUrl(e.target.value)}
+          value={link}
+          onChange={e => setLink(e.target.value)}
           required
         />
 
-        {image && <img src={image} alt="preview" />}
+        {image && (
+          <img
+            src={image}
+            alt="Preview"
+            style={{ maxWidth: "10%", borderRadius: 8 }}
+          />
+        )}
 
-        <button type="submit">Save recipe</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Fetching preview..." : "Save recipe"}
+        </button>
+
+        <button type="button" onClick={onCancel}>
+          Cancel
+        </button>
       </form>
     </div>
   );
